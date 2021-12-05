@@ -7,6 +7,16 @@ class Preprocessing(object):
         Base class to handle preprocessing
     """
 
+    MODEL_FEATURES = {
+        "words": utils.count_words,
+        "hashtags": utils.count_hashtags,
+        "hashtag_ratio": utils.hashtag_per_word_ratio,
+        "URLs": utils.count_url,
+        "URL_ratio": utils.URL_per_word_ratio,
+        "numbers": utils.count_numbers,
+        "mentions": utils.count_mentions
+    }
+
     RAW_TRAIN_PATH = "model/dataset/train-tweets.csv"
     RAW_TEST_PATH = "model/dataset/test-tweets.csv"
 
@@ -46,7 +56,7 @@ class Preprocessing(object):
         print("\nNANs in train")
         print('===================')
         train_df = self._replace_nam_median(train_df)
-        print("NANs in test")
+        print("\n\nNANs in test")
         print('===================')
         test_df = self._replace_nam_median(test_df)
 
@@ -71,8 +81,8 @@ class Preprocessing(object):
             :return: dataframe
         """
     
-        print('-------------------')
         print(df.isna().sum())
+        print('-------------------')
         df['following'].fillna(df['following'].median(), inplace=True)
         df['followers'].fillna(df['followers'].median(), inplace=True)
         df['actions'].fillna(df['actions'].median(), inplace=True)
