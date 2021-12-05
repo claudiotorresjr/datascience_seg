@@ -38,7 +38,7 @@ No diretório `datascience_seg` faça o comando:
 ```export PYTHONPATH="${PYTHONPATH}:${pwd}/datascience_seg"```
 
 2- Para passar por todos os processos (os gráficos do dataset de treino e do dataset utilizado no 
-predict ficarão no diretório `model/charts/{nome_dataset}):
+predict ficarão no diretório `model/charts/{nome_classificador}_{nome_dataset}):
 
 ```python scripts/run_model.py -p -f {arquivo com os tweets para predict} -c {nome do classificador}```
 
