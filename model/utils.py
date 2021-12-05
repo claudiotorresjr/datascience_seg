@@ -2,6 +2,9 @@ import re
 import os
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+
+from model import charts
 
 def find_url(string):
     """
@@ -134,6 +137,109 @@ def count_mentions(string):
 
     return len(mentions)
 
+def generate_charts_and_infos(df, data_path, output_dir):
+    """
+        Generate all charts and calculate infos about the data
+
+        :param df: dataframe
+        :param data_path: data path to get tha file name
+        :param output_dir: chart output
+    """
+
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+        print(f"created folder: {output_dir}")
+
+    ch = charts.Charts()
+    
+    print("Generating charts...")
+    ####### pie chart of all and unique tweets (spam and non-spam)
+    output = f"{output_dir}/all_and_unique_spam"
+    labels = 'Spam', 'Non-spam'
+    description = ["Relação entre todos os tweets", "Relação entre tweets únicos (sem duplicados)"]
+    df_unique = df.drop_duplicates(subset="Tweet")
+    ch.pie_chart_tweets(df, df_unique, "Type", "Spam", "Quality", labels, description, output)
+
+    ####### pie chart of spam and non-spam (retweeted and not)
+    output = f"{output_dir}/retweet_and_not_spam"
+    labels = 'retweet', 'No-retweet'
+    description = ["Relação entre spam", "Relação entre não spam"]
+    ch.pie_chart_tweets(df[df["Type"] == "Spam"], df[df["Type"] == "Quality"], "is_retweet", 1, 0, labels, description, output)
+
+    ####### bar chart for relations between features (ex. hashtags) between spam and non-spam
+    limit = np.arange(1, 6, 1)
+    output = f"{output_dir}/hashtags_relation"
+    ch.get_col_counts_plot(df, limit, 'hashtags', "Número de hashtags", output)
+    output = f"{output_dir}/mentions_relation"
+    ch.get_col_counts_plot(df, limit, 'mentions', "Número de menções", output)
+    output = f"{output_dir}/urls_relation"
+    ch.get_col_counts_plot(df, limit, 'URLs', "Número de URLs", output)
+    print("Charts generated")
+
+    print(f"\n{data_path.split('/')[-1]} summary information")
+    print(f"{create_info_table(df)}\n")
+
+    print("\nGenerating top ranking...")
+    for element in [["Hashtags", find_hashtag], ["URLs", find_url]]:
+        print(f"\n{data_path.split('/')[-1]} {element[0]} rank for Spam and Non-spam")
+        top_elements_df = []
+        for tp in ["Spam", "Quality"]:
+            ####### get all 'Spam' tweets and 'find_*' in it
+            all_elements = get_all_infos(df, tp, element[1], element[0])
+            ####### print a top 5 hashtags from Spam
+            top_elements_df.append(get_ranking(all_elements, 5, [element[0], "Quantidade"]))
+        
+        top = pd.concat([d.reset_index(drop=True) for d in [top_elements_df[0], top_elements_df[1]]], axis=1)
+        print(top)
+
+    print("-"*20)
+
+def create_features_columns(df, train=False):
+    """
+        Calculate all df features
+
+        :param df: dataframe
+        :param train: if set, will append the Type column
+
+        :return: dataframe
+    """
+
+    model_features = {
+        "words": count_words,
+        "hashtags": count_hashtags,
+        "hashtag_ratio": hashtag_per_word_ratio,
+        "URLs": count_url,
+        "URL_ratio": URL_per_word_ratio,
+        "numbers": count_numbers,
+        "mentions": count_mentions
+    }
+    new_columns = ['Tweet', 'following', 'followers', 'actions', 'is_retweet']
+
+    for feature, func in model_features.items():
+        df[feature] = df['Tweet'].apply(func)
+        new_columns.append(feature)
+    
+    if train:
+        new_columns.append('Type')
+    
+    df = df[new_columns]
+
+    return df
+
+def normalize(to_normalize):
+    """
+        Normalize data
+
+        :param to_normalize: data to be normalized
+
+        :return: normalized data
+    """
+
+    min_max_scaler = MinMaxScaler()
+    to_normalize = min_max_scaler.fit_transform(to_normalize)
+
+    return to_normalize
+
 def get_all_infos(df, tp, func, is_url):
     """
         Get all elements from df 'Type' field that match the func method
@@ -142,8 +248,9 @@ def get_all_infos(df, tp, func, is_url):
         :param df: dataframe to search
         :param tp: type of tweet (spam or non-spam)
         :param func: method to get the elements from df
+        :param is_url: if is "URLs",search for the real url (some tt urls is like t.co/xxx)
 
-        :return: dict with all elements and it count
+        :return: all elements found
     """
 
     new_df = df[df["Type"] == tp]
@@ -168,7 +275,7 @@ def get_all_infos(df, tp, func, is_url):
 
     return all_elements
 
-def get_ranking(rank_dict, rank, columns, tp):
+def get_ranking(rank_dict, rank, columns):
     """
         Return a dataframe with the top 'rank' values in rank_dict
 
@@ -180,7 +287,6 @@ def get_ranking(rank_dict, rank, columns, tp):
         :return: dataframe with ranking
     """
 
-    #print(f"{tp} top ranking for {columns[0]}:")
     rank_dict = dict(sorted(rank_dict.items(), key=lambda x: x[1], reverse=True))
     
     keys = []
@@ -200,6 +306,15 @@ def get_ranking(rank_dict, rank, columns, tp):
     return pd.DataFrame(list(zip(keys, values)), index=np.arange(1, rank+1, 1), columns=columns)
 
 def get_data_info(data_df, tweet_type):
+    """
+        Get dataframe data about spam and non-spam tweets
+
+        :param data_df: dataframe
+        :param tweet_type: Spam or Quality
+
+        :return: list with all data calculated
+    """
+
     #todos os tweets do tipo 'tweet_type'
     only_tweet_type = data_df[data_df['Type'] == tweet_type]
     
@@ -232,6 +347,14 @@ def get_data_info(data_df, tweet_type):
     ]
 
 def create_info_table(df):
+    """
+        Create the table (dataframe) with the data info list
+
+        :param df: dataframe
+
+        :return: dataframe with all info
+    """
+
     spam = get_data_info(df, "Spam")
     non_spam = get_data_info(df, "Quality")
 

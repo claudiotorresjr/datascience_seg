@@ -6,12 +6,20 @@ from model import utils
 from model import charts
 
 class Charts(object):
-    def __init__(self, data_path):
-        self.data_path = data_path
-
-        self.df = pd.read_csv(data_path, delimiter = ',')
-
     def pie_chart_tweets(self, df1, df2, column, comp1, comp2, labels, description, output):
+        """
+            Create a pie chart
+
+            :param df1: first dataframe
+            :param df2: second dataframe to compare with the first
+            :param column: column to be compared
+            :param comp1: element value to compare (ex. Spam)
+            :param comp2: element value to compare (ex. Quality)
+            :param labels: chart label
+            :param description: chart description
+            :param output: chart output
+        """
+
         spam = len(df1[df1[column] == comp1])
         non_spam = len(df1[df1[column] == comp2])
         all_sizes = [spam/len(df1), non_spam/len(df1)]
@@ -30,9 +38,19 @@ class Charts(object):
         axes[1].axis('equal')
         
         #plt.show()
-        plt.savefig(f"model/charts/{output}.png")
+        plt.savefig(f"{output}.png")
 
-    def count_col(self, df, num, limit):
+    def count_col(self, df, col, limit):
+        """
+            count number of occurences of col using limit as trashold
+
+            :param df: dataframe
+            :param col: column name
+            :param limit: treshold list
+            :param description: chart description
+            :param output: chart output
+        """
+
         tweets = {
             "Spam": [],
             "Quality": []
@@ -40,17 +58,24 @@ class Charts(object):
         for tp, l in tweets.items():
             all_tweets = df[df['Type'] == tp]
             for i in limit:
-                count_values = len(all_tweets[all_tweets[num] == i])
+                count_values = len(all_tweets[all_tweets[col] == i])
                 l.append(count_values)
         
         return tweets
 
-    def get_col_counts_plot(self, df, limit, num, description, output):
+    def get_col_counts_plot(self, df, limit, col, description, output):
+        """
+            create a bar plot
+
+            :param df: dataframe
+            :param limit: treshold list
+            :param col: column name
+        """
         list_test = []
         list2_test = []
 
-        all_tweets = self.count_col(df, num, limit)
-        unique_tweets = self.count_col(df.drop_duplicates(subset="Tweet"), num, limit)
+        all_tweets = self.count_col(df, col, limit)
+        unique_tweets = self.count_col(df.drop_duplicates(subset="Tweet"), col, limit)
         
         width = 0.3
         fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15, 6))
@@ -82,4 +107,4 @@ class Charts(object):
         axes[1].set_xticks(limit)
 
         #plt.show()
-        plt.savefig(f"model/charts/{output}.png")
+        plt.savefig(f"{output}.png")

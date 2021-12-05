@@ -1,9 +1,9 @@
 import tweepy
 import argparse
 
-API_KEY = "zlBrn2JIxuL5vp8KfKquoHovZ"
-API_SECRET = "U8kJRmA80zDUUUCrrpMcCpUVmxnL6Vr88kKaiwIUVKuBV8h0jI"
-BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAAISpUgEAAAAANxIPMALzrWI351MQA1aXDuZLxR8%3DmVGoZekK4OUGFuOorQKRGmATUTg2tI1ow2QR9s04kKsAXxdVSB"
+API_KEY = ""
+API_SECRET = ""
+BEARER_TOKEN = ""
 
 BRAZIL_WOE_ID = 23424768
 
@@ -42,6 +42,13 @@ def get_arguments():
     return options
 
 def get_all_urls(tweet, full_text, urls_to_remove):
+    """
+        Get all urls from tweet
+
+        :param full_text: tweet text
+        :param urls_to_remove: urls to not get
+    """
+
     for entitie in ["urls", "media"]:
         try:
             for ent in tweet.entities[entitie]:
@@ -55,6 +62,15 @@ def get_all_urls(tweet, full_text, urls_to_remove):
             pass
 
 def save_tweets_dataset(all_tweets_info, urls_to_remove, output_path, remove_urls=False):
+    """
+        Save all tweets info to a file
+
+        :param all_tweets_info: all tweets info
+        :param urls_to_remove: urls to not save
+        :param output_path: tweets info file output
+        :param remove_urls: if set, will not save urls in urls_to_remove
+    """
+
     with open(output_path, "w") as save_file:
         save_file.write(f"id,Tweet,following,followers,actions,is_retweet,tweet_url\n")
         for i, tt in enumerate(all_tweets_info):
@@ -67,6 +83,13 @@ def save_tweets_dataset(all_tweets_info, urls_to_remove, output_path, remove_url
             save_file.write(f"{tt['isretweeted']},{tt['tweeter_url']}\n")
     
 def search_for_tag(tag, num_tweets, output_path):
+    """
+        Search for a tag/text in twitter
+
+        :param num_tweets: number of tweets to search
+        :param output_path: tweets info file output
+    """
+
     all_tweets_info = []
     urls_to_remove = []
     for tweet in tweepy.Cursor(api.search_tweets, tag, lang='pt', count=100, tweet_mode='extended').items(num_tweets):
@@ -93,6 +116,10 @@ def search_for_tag(tag, num_tweets, output_path):
     save_tweets_dataset(all_tweets_info, urls_to_remove, output_path)
 
 def main():
+    """
+        Main method
+    """
+
     arg = get_arguments()
     tag = arg.tag
     num_tweets = int(arg.num_tweets)

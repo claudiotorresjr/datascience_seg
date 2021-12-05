@@ -13,16 +13,6 @@ class Preprocessing(object):
     CLEAN_TRAIN_PATH = "model/dataset/train-tweets-clean.csv"
     CLEAN_TEST_PATH = "model/dataset/test-tweets-clean.csv"
 
-    MODEL_FEATURES = {
-        "words": utils.count_words,
-        "hashtags": utils.count_hashtags,
-        "hashtag_ratio": utils.hashtag_per_word_ratio,
-        "URLs": utils.count_url,
-        "URL_ratio": utils.URL_per_word_ratio,
-        "numbers": utils.count_numbers,
-        "mentions": utils.count_mentions
-    }
-
     def start_process(self):
         """
             Start the preprocessing process
@@ -62,31 +52,25 @@ class Preprocessing(object):
 
         print(f"\nCalculating all features from train dataset:")
         print(f"{' '.join(self.MODEL_FEATURES)}")
-        train_df = self._create_features_columns(train_df, True)
+        train_df = utils.create_features_columns(train_df, True)
 
         print(f"\nCalculating all features from test dataset:")
         print(f"{' '.join(self.MODEL_FEATURES)}")
-        test_df = self._create_features_columns(test_df)
+        test_df = utils.create_features_columns(test_df)
 
         #save datasets
         train_df.to_csv(self.CLEAN_TRAIN_PATH, sep = ',', header=True, index=False)
         test_df.to_csv(self.CLEAN_TEST_PATH, sep = ',', header=True, index=False)
-
-    def _create_features_columns(self, df, train=False):
-        new_columns = ['Tweet', 'following', 'followers', 'actions', 'is_retweet']
-
-        for feature, func in self.MODEL_FEATURES.items():
-            df[feature] = df['Tweet'].apply(func)
-            new_columns.append(feature)
-        
-        if train:
-            new_columns.append('Type')
-        
-        df = df[new_columns]
-
-        return df
     
     def _replace_nam_median(self, df):
+        """
+            Replace all NaN values with the column values median
+
+            :param df: dataframe
+
+            :return: dataframe
+        """
+    
         print('-------------------')
         print(df.isna().sum())
         df['following'].fillna(df['following'].median(), inplace=True)
@@ -97,6 +81,12 @@ class Preprocessing(object):
         return df
 
     def _labels_count(self, df):
+        """
+            Count the total of span and non-spam
+
+            :param df: dataframe
+        """
+
         spam_count = len(df.loc[df['Type'] == 'Spam'])
         non_spam_count = len(df.loc[df['Type'] == 'Quality'])
         total = spam_count + non_spam_count
