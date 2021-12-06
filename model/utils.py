@@ -181,16 +181,21 @@ def generate_charts_and_infos(df, data_path, output_dir):
 
     print("\nGenerating top ranking...")
     for element in [["Hashtags", find_hashtag], ["URLs", find_url]]:
-        print(f"\n{data_path.split('/')[-1]} {element[0]} rank for Spam and Non-spam")
-        top_elements_df = []
-        for tp in ["Spam", "Quality"]:
-            ####### get all 'Spam' tweets and 'find_*' in it
-            all_elements = get_all_infos(df, tp, element[1], element[0])
-            ####### print a top 5 hashtags from Spam
-            top_elements_df.append(get_ranking(all_elements, 5, [element[0], "Quantidade"]))
-        
-        top = pd.concat([d.reset_index(drop=True) for d in [top_elements_df[0], top_elements_df[1]]], axis=1)
-        print(top)
+        for a in ["All", "Unique"]:
+            print(f"\n{data_path.split('/')[-1]} {element[0]} rank for {a} tweets (Spam and Non-spam)")
+            top_elements_df = []
+
+            tweets_df = df
+            if a == "Unique":
+                tweets_df = df.drop_duplicates(subset="Tweet")
+            for tp in ["Spam", "Quality"]:
+                ####### get all 'Spam' tweets and 'find_*' in it
+                all_elements = get_all_infos(tweets_df, tp, element[1], element[0])
+                ####### print a top 5 hashtags from Spam
+                top_elements_df.append(get_ranking(all_elements, 5, [element[0], "Quantidade"]))
+            
+            top = pd.concat([d.reset_index(drop=True) for d in [top_elements_df[0], top_elements_df[1]]], axis=1)
+            print(top)
 
     print("-"*20)
 
