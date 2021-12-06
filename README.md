@@ -35,12 +35,12 @@ e gera os gráficos no diretório `model/charts`.
 
 No diretório `datascience_seg` faça o comando:
 
-```export PYTHONPATH="${PYTHONPATH}:${pwd}/datascience_seg"```
+```export PYTHONPATH="${PYTHONPATH}:${pwd}"```
 
 2- Para passar por todos os processos (os gráficos do dataset de treino e do dataset utilizado no 
 predict ficarão no diretório `model/charts/{nome_classificador}_{nome_dataset}):
 
-```python scripts/run_model.py -p -f {arquivo com os tweets para predict} -c {nome do classificador}```
+```python scripts/run_model.py -p -k -f {arquivo com os tweets para predict} -c {nome do classificador}```
 
     python scripts/run_model.py -p -k -f tweets_selvagens/giveaway_file.csv -c KNN
 
@@ -50,4 +50,4 @@ predict ficarão no diretório `model/charts/{nome_classificador}_{nome_dataset}
 
 `-f`: Flag necessária. Path para o arquivo com os tweets para predict.
 
-`-c`: Flag necessária. Classificador que será utilizado (RandomForest, KNN, MLP, SVC).
+`-c`: Flag necessária. Classificador que será utilizado (RandomForest, KNN, MLP).
