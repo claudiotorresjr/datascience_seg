@@ -20,6 +20,11 @@ def get_arguments():
         action='store_true'
     )
     parser.add_argument(
+        '-k',
+        help='If present, the model will show kfold avaliation.',
+        action='store_true'
+    )
+    parser.add_argument(
         "-f",
         action='store',
         dest="predict_file",
@@ -38,17 +43,18 @@ def get_arguments():
     options = parser.parse_args()
     return options
 
-def training_and_validation_process(data_path):
+def training_and_validation_process(data_path, avaliation):
     """
         Start the training and validation process
 
         :param data_path: train file path
+        :param avaliation: flag to show or not the kfold avaliation
 
         :return: classifiers list
     """
 
     print("\nStarting training process")
-    train = training.Training(data_path)
+    train = training.Training(data_path, avaliation)
 
     train.start_process()
 
@@ -84,7 +90,7 @@ def main():
     if arg.p:
         do_preprocessing()
 
-    classifiers = training_and_validation_process(preprocessing.Preprocessing.CLEAN_TRAIN_PATH)
+    classifiers = training_and_validation_process(preprocessing.Preprocessing.CLEAN_TRAIN_PATH, arg.k)
 
     df = pd.read_csv(preprocessing.Preprocessing.CLEAN_TRAIN_PATH, delimiter = ',')
     utils.generate_charts_and_infos(df, preprocessing.Preprocessing.CLEAN_TRAIN_PATH, "model/charts/train")

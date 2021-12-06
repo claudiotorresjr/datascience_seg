@@ -108,3 +108,35 @@ class Charts(object):
 
         #plt.show()
         plt.savefig(f"{output}.png")
+
+    @staticmethod
+    def plot_roc_curve_folds(roc_dict, n_folds, sup_title, clf_name):
+        """
+            Plot the roc curves for a given classifier
+
+            :param roc_dict: dict with roc curves of classifiers
+            :param n_folds: total of folds
+            :param sup_title: chart title
+            :param clf_name: classsifier name
+        """
+
+        fig, axs = plt.subplots(nrows=1, ncols=n_folds, sharey=True, sharex=True, figsize=(15,5))
+
+        for fold in range(5):
+            axs[fold].plot(roc_dict[fold][clf_name]['FP'], roc_dict[fold][clf_name]['TP'])
+            axs[fold].set_title('Fold ' + str(fold))
+            axs[fold].set_xlabel('FP', fontsize=12)
+            axs[fold].set_ylabel('VP', fontsize=12)
+
+            axs[fold].grid(linewidth=0.25)
+
+            #remove bounding box around the graphs 
+            axs[fold].spines['left'].set_visible(False)
+            axs[fold].spines['top'].set_visible(False)
+            axs[fold].spines['right'].set_visible(False)  
+
+        fig.tight_layout()
+        fig.subplots_adjust(top=0.88)
+        fig.suptitle(sup_title)
+    
+        fig.savefig(f"model/charts/ROC/{clf_name}_curves.png")

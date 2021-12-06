@@ -37,7 +37,7 @@ class Predict(object):
         predict_df_copy = predict_df.copy()
         predict_df_2 = predict_df_copy.iloc[:, 1:]
 
-        predict_df_2 = utils.normalize(predict_df_2)
+        #predict_df_2 = utils.normalize(predict_df_2)
 
         result = classifiers[classifier_name].predict(predict_df_2)
 

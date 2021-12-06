@@ -1,2 +1,3 @@
 tt_api
 model/charts/*
+**/__pycache__

@@ -42,8 +42,12 @@ predict ficarão no diretório `model/charts/{nome_classificador}_{nome_dataset}
 
 ```python scripts/run_model.py -p -f {arquivo com os tweets para predict} -c {nome do classificador}```
 
-    python scripts/run_model.py -p -f tweets_selvagens/giveaway_file.csv -c KNN
+    python scripts/run_model.py -p -k -f tweets_selvagens/giveaway_file.csv -c KNN
 
-(Caso não queira passar pelo pré-processamento novamente, retire a flag `-p`)
+`-p`: Flag não não necessária. Realiza o pré processamento.
 
-Classificadores atuais: RandomForest, KNN, MLP, SVC
+`-k`: Flag não não necessária. Mostra a avaliação do K-fold.
+
+`-f`: Flag necessária. Path para o arquivo com os tweets para predict.
+
+`-c`: Flag necessária. Classificador que será utilizado (RandomForest, KNN, MLP, SVC).
