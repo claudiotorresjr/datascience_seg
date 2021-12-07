@@ -1,6 +1,14 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.pylab as pylab
+params = {'legend.fontsize': 'x-large',
+          'figure.figsize': (15, 6),
+         'axes.labelsize': 'x-large',
+         'axes.titlesize':'x-large',
+         'xtick.labelsize':'x-large',
+         'ytick.labelsize':'x-large'}
+pylab.rcParams.update(params)
 
 from model import utils
 from model import charts
@@ -26,7 +34,8 @@ class Charts(object):
         
         fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15, 6))
         axes[0].set_title(description[0])
-        axes[0].pie(all_sizes, labels=labels, autopct='%1.2f%%', startangle=90)
+        axes[0].pie(all_sizes, autopct='%1.2f%%', startangle=90)
+        axes[0].legend(labels, loc="best")
         axes[0].axis('equal')
         
         spam = len(df2[df2[column] == comp1])
@@ -34,7 +43,8 @@ class Charts(object):
         unique_sizes = [spam/len(df2), non_spam/len(df2)]
 
         axes[1].set_title(description[1])
-        axes[1].pie(unique_sizes, labels=labels, autopct='%1.2f%%', startangle=90)
+        axes[1].pie(unique_sizes, autopct='%1.2f%%', startangle=90)
+        axes[1].legend(labels, loc="best")
         axes[1].axis('equal')
         
         #plt.show()
